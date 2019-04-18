@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smartzer.restServer.model.Video;
 import com.smartzer.restServer.service.VideoService;
+import com.smartzer.restServer.util.CustomErrorType;
 
 @RestController
 public class VideoRestController {
@@ -25,10 +26,15 @@ public class VideoRestController {
  
     @RequestMapping(value = "/video", method = RequestMethod.GET)
     public ResponseEntity<List<Video>> listAllVideos() {
-        List<Video> videos = videoService.findAllVideos();
-        if (videos == null || videos.isEmpty()) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
+    	List<Video> videos = null;
+    	try{
+	        videos = videoService.findAllVideos();
+	        if (videos == null || videos.isEmpty()) {
+	            return new ResponseEntity(new CustomErrorType("No videos found"),HttpStatus.NOT_FOUND);
+	        }
+    	} catch (Exception ex){
+    		return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
         return new ResponseEntity<List<Video>>(videos, HttpStatus.OK);
     }
     
@@ -36,10 +42,15 @@ public class VideoRestController {
     
     @RequestMapping(value = "/video/{id}", method = RequestMethod.GET)
     public ResponseEntity<Video> getVideo(@PathVariable("id") long id) {
-        Video video = videoService.findById(id);
-        if (video == null) {
-        	return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
+    	Video video = null;
+    	try{
+	        video = videoService.findById(id);
+	        if (video == null) {
+	        	return new ResponseEntity(new CustomErrorType("Video with id : " + id + " not found"), HttpStatus.NOT_FOUND);
+	        }
+    	} catch (Exception ex){
+    		return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
         return new ResponseEntity<Video>(video, HttpStatus.OK);
     }
     
@@ -47,26 +58,35 @@ public class VideoRestController {
     
     @RequestMapping(value = "/video", method = RequestMethod.POST)
     public ResponseEntity<Video> createVideo(@RequestBody Video video) {
+    	Video newVideo = null;
+    	try{
+	        if (videoService.doesVideoExist(video)) {
+	        	return new ResponseEntity(new CustomErrorType("Video with : " + video.getName() + " name already exists"), HttpStatus.CONFLICT);
+	        }
+	        newVideo = videoService.saveVideo(video);
+    	} catch (Exception ex){
+    		return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
  
-        if (videoService.doesVideoExist(video)) {
-        	return new ResponseEntity(HttpStatus.CONFLICT);
-        }
-        video = videoService.saveVideo(video);
- 
-        return new ResponseEntity<Video>(video, HttpStatus.CREATED);
+        return new ResponseEntity<Video>(newVideo, HttpStatus.CREATED);
     }
     
     // ------------------- Update a Video ------------------------------------------------
     
     @RequestMapping(value = "/video/{id}", method = RequestMethod.POST)
     public ResponseEntity<Video> updateVideo(@PathVariable("id") long id, @RequestBody Video video) {
- 
-        Video currentVideo = videoService.findById(id);
- 
-        if (currentVideo == null) {
-        	return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        currentVideo = videoService.updateVideo(currentVideo, video);
+    	
+    	Video currentVideo = null;
+    	try{
+	        currentVideo = videoService.findById(id);
+	 
+	        if (currentVideo == null) {
+	        	return new ResponseEntity(new CustomErrorType("Video with id : " + id + " not found"), HttpStatus.NOT_FOUND);
+	        }
+	        currentVideo = videoService.updateVideo(currentVideo, video);
+    	} catch (Exception ex){
+    		return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
         
         return new ResponseEntity<Video>(currentVideo, HttpStatus.OK);
     }
@@ -76,11 +96,15 @@ public class VideoRestController {
     @RequestMapping(value = "/video/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteVideo(@PathVariable("id") long id) {
  
-        Video video = videoService.findById(id);
-        if (video == null) {
-        	return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        videoService.deleteVideoById(id);
+    	try{
+	        Video video = videoService.findById(id);
+	        if (video == null) {
+	        	return new ResponseEntity(new CustomErrorType("Video with id : " + id + " not found"), HttpStatus.NOT_FOUND);
+	        }
+	        videoService.deleteVideoById(id);
+    	} catch (Exception ex){
+    		return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     

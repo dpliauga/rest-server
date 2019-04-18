@@ -68,6 +68,7 @@ $(document).ready( function() {
 	    		$("#videoName").val(videoName);
 	    		$("#videoUrl").val(videoUrl);
 	    		$("#videoId").val(video.id);
+	    		$("#createModalLabel").html("Update video");
 	    		$("#createButton").css("display", "none");
 	    		$("#updateButton").css("display", "inline");
 	    		$("#deleteButton").css("display", "inline");
@@ -130,6 +131,7 @@ $(document).ready( function() {
  });
 
 function openCreatePopup(){
+	$("#createModalLabel").html("Create a new video");
 	$("#createButton").css("display", "inline");
 	$("#updateButton").css("display", "none");
 	$("#deleteButton").css("display", "none");
