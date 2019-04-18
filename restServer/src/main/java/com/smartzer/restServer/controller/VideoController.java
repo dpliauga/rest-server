@@ -11,5 +11,5 @@ public class VideoController {
     public String listAllVideos() {
         return "index";
     }
-
+    
 }
