@@ -41,7 +41,7 @@ $(document).ready( function() {
 	        dataType: "json",
 	        statusCode: {
 	            404: function() {
-	            	$("#allVideos").html("<option value='' disabled>no videos found</option>");
+	            	$("#allVideos").html("<option value='' disabled>No videos found</option>");
 	            }
 	        },
 	        success: function(videos){
